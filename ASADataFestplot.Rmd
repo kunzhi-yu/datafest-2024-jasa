@@ -1,0 +1,70 @@
+---
+title: "Untitled"
+output:
+  pdf_document: default
+  html_document: default
+date: "2024-04-27"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(tidyverse)
+library(ggplot2)
+library(MASS)
+require(dplyr)
+require(MASS)
+library(broom)
+```
+
+
+```{r}
+engagement <- chapter_section_engagement_metrics
+engagement
+engage_sum <- engagement %>% group_by(chapter_number) %>%
+  summarize(percentage_completed = (mean(`proportion of students who completed section`)*100))
+engage_sum
+
+```
+
+
+```{r}
+# Calculate the mean of 'eoc' for each chapter
+mean_eoc <- aggregate(EOC ~ chapter_number, data = eoc_data, FUN = mean)
+mean_eoc <- mean_eoc %>% mutate(EOC = EOC*100)
+mean_eoc
+
+```
+
+```{r}
+summary <- merge(mean_eoc, engage_sum)
+summary
+
+```
+
+```{r}
+plot(summary$chapter_number,summary$percentage_completed,
+     xlab = "Chapter Number",
+     ylab = "Percentage",
+     type = "l",
+     col = "#658357",
+     ylim = c(0, 100),
+     lwd = 3,
+     cex = 0.8)
+
+lines(summary$chapter_number,summary$EOC,
+       col = "#25355A",
+      lwd = 3)
+
+legend(9, 100, legend=c("Chapter Completion", "EOC Score"), col=c("#658357", "#25355A"), lty = 1:2, cex = 0.5, box.lty = 0)
+
+axis(1, at = seq(0, 12, by = 1), las = 0)
+```
+
+
+```{r}
+per_eoc <-summary %>% dplyr::select(chapter_number, percentage_completed, EOC)
+per_eoc
+```
